@@ -50,7 +50,8 @@ def _query_api():
             raise ClistApiError
         return resp.json()['objects']
     except Exception as e:
-        logger.error(f'Request to Clist API encountered error: {e!r}')
+        # Do not log exception details: requests may include the API key in the URL.
+        logger.error('Clist API request failed (%s)', type(e).__name__)
         raise ClientError from e
 
 
