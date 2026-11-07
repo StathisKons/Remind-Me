@@ -23,7 +23,7 @@ class WebsitePatterns:
         return name
 
 # Todo : Move these to external db
-supported_websites = ['codeforces.com', 'codechef.com', 'atcoder.jp', 'facebook.com/hackercup', 'tlx.toki.id']
+supported_websites = ['codeforces.com', 'codechef.com', 'atcoder.jp', 'facebook.com/hackercup', 'tlx.toki.id', 'usaco.org']
 schema = defaultdict(WebsitePatterns)
 
 def _is_matched_for_codeforces(name, for_all = True):
@@ -123,4 +123,17 @@ schema['tlx.toki.id'] = WebsitePatterns(
     _shorthands=['toki', 'troc'],
     _prefix='TOKI Regular Open Contest',
     _rare=True
+)
+
+# USACO runs multiday online contests rather than a single synchronized start.
+# Clist also lists non-USACO events under usaco.org (e.g. EGOI); skip those.
+def _is_matched_for_usaco(name, for_all=True):
+    title = name.lower()
+    return ('contest' in title or 'us open' in title or 'usaco open' in title) and 'egoi' not in title
+
+
+schema['usaco.org'] = WebsitePatterns(
+    _is_matched=_is_matched_for_usaco,
+    _shorthands=['usaco'],
+    _prefix='USACO',
 )
