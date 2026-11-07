@@ -51,7 +51,7 @@ def setup():
 
 
 async def main():
-    load_dotenv()
+    load_dotenv(dotenv_path=os.getenv('REMIND_ENV_FILE', '.env'))
 
     token = os.getenv('BOT_TOKEN_REMIND')
     if not token:
