@@ -1,0 +1,17 @@
+FROM python:3.12-slim-bookworm
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    HOME=/tmp
+
+WORKDIR /app
+
+COPY requirements.txt ./
+RUN python -m pip install --no-cache-dir -r requirements.txt
+
+COPY remind/ ./remind/
+RUN mkdir -p /app/data /app/logs && chown -R 110:119 /app/data /app/logs
+
+USER 110:119
+
+CMD ["python", "-m", "remind"]
