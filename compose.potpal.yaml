@@ -1,4 +1,4 @@
-name: stathis-discord-bots
+name: stathis-contest-reminder
 
 services:
   remind:
