@@ -31,6 +31,8 @@ class ClientError(ClistApiError):
 def _query_api():
     clist_username = os.getenv('CLIST_API_USERNAME')
     clist_api_key = os.getenv('CLIST_API_KEY')
+    if not clist_username or not clist_api_key:
+        raise ClistApiError('Clist API credentials missing')
     contests_start_time = dt.datetime.utcnow() - dt.timedelta(days=2)
     contests_start_time_string = contests_start_time.strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -43,7 +45,7 @@ def _query_api():
     }
 
     try:
-        resp = requests.get(URL_BASE, params=param)
+        resp = requests.get(URL_BASE, params=param, timeout=(5, 20))
         if resp.status_code != 200:
             raise ClistApiError
         return resp.json()['objects']
@@ -60,17 +62,21 @@ def cache(forced=False):
     try:
         with db_file.open() as f:
             db = json.load(f)
-    except BaseException:
+    except (OSError, ValueError, KeyError, TypeError):
         pass
 
-    last_time_stamp = db['querytime'] if db and db['querytime'] else 0
+    last_time_stamp = db.get('querytime', 0) if isinstance(db, dict) else 0
 
     if not forced and current_time_stamp - last_time_stamp < _CLIST_API_TIME_DIFFERENCE:
         return
 
     try:
         contests = _query_api()
-    except:
+    except ClistApiError:
+        # Let the bot start and retry later if the first API fetch fails.
+        if db is None:
+            with db_file.open('w') as f:
+                json.dump({'querytime': 0, 'objects': []}, f)
         return
 
     db = {'querytime': current_time_stamp, 'objects': contests}
