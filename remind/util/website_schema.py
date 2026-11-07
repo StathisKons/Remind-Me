@@ -23,7 +23,7 @@ class WebsitePatterns:
         return name
 
 # Todo : Move these to external db
-supported_websites = ['codeforces.com', 'codechef.com', 'atcoder.jp', 'facebook.com/hackercup', 'tlx.toki.id', 'usaco.org']
+supported_websites = ['codeforces.com', 'codechef.com', 'atcoder.jp', 'facebook.com/hackercup', 'tlx.toki.id', 'usaco.org', 'hsin.hr/coci']
 schema = defaultdict(WebsitePatterns)
 
 def _is_matched_for_codeforces(name, for_all = True):
@@ -136,4 +136,11 @@ schema['usaco.org'] = WebsitePatterns(
     _is_matched=_is_matched_for_usaco,
     _shorthands=['usaco'],
     _prefix='USACO',
+)
+
+# Croatian Open Competition in Informatics (COCI), hosted on hsin.hr.
+schema['hsin.hr/coci'] = WebsitePatterns(
+    _is_matched=lambda name, for_all=True: True,
+    _shorthands=['coci'],
+    _prefix='COCI',
 )
