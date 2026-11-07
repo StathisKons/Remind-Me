@@ -10,7 +10,7 @@ import re
 import copy
 
 from collections import defaultdict
-from recordtype import recordtype
+from dataclasses import dataclass, field, fields
 from datetime import datetime
 
 import discord
@@ -35,24 +35,28 @@ _FINISHED_CONTESTS_LIMIT = 5
 _CONTEST_REFRESH_PERIOD = 10 * 60  # seconds
 _GUILD_SETTINGS_BACKUP_PERIOD = 6 * 60 * 60  # seconds
 
-GuildSettings = recordtype(
-    'GuildSettings', [
-        ('remind_channel_id_div1', None),
-        ('remind_role_id_div1', None),
-        ('remind_before_div1', None),
-        ('finalcall_channel_id_div1', None),
-        ('finalcall_before_div1', None),
-        ('subscribed_websites_div1', set()),
+@dataclass
+class GuildSettings:
+    remind_channel_id_div1: int | None = None
+    remind_role_id_div1: int | None = None
+    remind_before_div1: list | None = None
+    finalcall_channel_id_div1: int | None = None
+    finalcall_before_div1: int | None = None
+    subscribed_websites_div1: set = field(default_factory=set)
 
-        ('remind_channel_id_all', None),
-        ('remind_role_id_all', None),
-        ('remind_before_all', None),
-        ('finalcall_channel_id_all', None),
-        ('finalcall_before_all', None),
-        ('subscribed_websites_all', set())
-    ]
-)
+    remind_channel_id_all: int | None = None
+    remind_role_id_all: int | None = None
+    remind_before_all: list | None = None
+    finalcall_channel_id_all: int | None = None
+    finalcall_before_all: int | None = None
+    subscribed_websites_all: set = field(default_factory=set)
 
+    def _asdict(self):
+        # Preserve the interface used when loading saved guild settings.
+        return {name: getattr(self, name) for name in self._fields}
+
+
+GuildSettings._fields = tuple(item.name for item in fields(GuildSettings))
 
 class RemindRequest:
     def __init__(self, channel, role, contest: Round, before_secs, send_time):
