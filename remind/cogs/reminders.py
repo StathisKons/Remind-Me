@@ -135,7 +135,13 @@ async def _send_reminder_at(request):
 
     labels = 'day hr min sec'.split()
     before_str = ' '.join(make(value, label) for label, value in zip(labels, values) if value > 0)
-    desc = f'About to start in {before_str}!'
+    if request.contest.website == 'usaco.org':
+        desc = (
+            f'USACO contest window opens in {before_str}! '
+            'Participants can choose when to start during the multi-day window.'
+        )
+    else:
+        desc = f'About to start in {before_str}!'
     embed = discord_common.color_embed(description=desc)
     if request.contest.is_rare():
         embed.set_footer(text=f"Its once in a while contest, you wouldn't wanna miss 👀")
