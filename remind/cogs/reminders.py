@@ -50,6 +50,7 @@ class GuildSettings:
     finalcall_channel_id_all: int | None = None
     finalcall_before_all: int | None = None
     subscribed_websites_all: set = field(default_factory=set)
+    split_codeforces_divisions: bool = False
 
     def _asdict(self):
         # Preserve the interface used when loading saved guild settings.
@@ -294,7 +295,20 @@ class Reminders(commands.Cog):
             if contest.is_desired_for_div1(settings.subscribed_websites_div1):
                 desired_contests_for_div1.append(contest)
             if contest.is_desired_for_all(settings.subscribed_websites_all):
-                desired_contests_for_all.append(contest)
+                # In split mode, exclude Codeforces Div. 1-only rounds from
+                # the general (Div. 2+) notifications. Combined Div. 1+2
+                # and "rated for all" rounds remain relevant to both groups.
+                title = contest.name.lower()
+                div1_only = (
+                    contest.website == 'codeforces.com'
+                    and 'div. 1' in title
+                    and not any(marker in title for marker in (
+                        'div. 2', 'div. 3', 'div. 4',
+                        'rated for all', 'rated for both', 'rated for everyone'
+                    ))
+                )
+                if not (settings.split_codeforces_divisions and div1_only):
+                    desired_contests_for_all.append(contest)
 
         return desired_contests_for_div1, desired_contests_for_all
 
@@ -632,6 +646,19 @@ class Reminders(commands.Cog):
                 not supported.' if unsupported_websites_str else ""
             embed = discord_common.embed_success(success_str)
         await ctx.send(embed=embed)
+
+    @remind.command(name='split_codeforces', brief='Split Codeforces Div. 1-only from other contests')
+    @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
+    async def split_codeforces(self, ctx, enabled: bool):
+        """Use with two separately configured reminder roles.
+
+        Example: t;remind split_codeforces on
+        """
+        self.guild_map[ctx.guild.id].split_codeforces_divisions = enabled
+        state = 'enabled' if enabled else 'disabled'
+        await ctx.send(embed=discord_common.embed_success(
+            f'Codeforces Div. 1/Div. 2+ reminder split {state}.'
+        ))
 
     @remind.command(brief='Stop contest reminders from websites.')
     @commands.has_any_role('Admin', constants.REMIND_MODERATOR_ROLE)
