@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+.env.*
+!env_file_variables.txt
+data/
+logs/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite*
