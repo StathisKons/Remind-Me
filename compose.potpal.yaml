@@ -1,0 +1,33 @@
+name: stathis-discord-bots
+
+services:
+  remind:
+    container_name: contest-reminder
+    image: remind-me-potpal:local
+    build:
+      context: .
+      dockerfile: Dockerfile.potpal
+    restart: unless-stopped
+    init: true
+    user: "110:119"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,noexec,size=32m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 128
+    mem_limit: 512m
+    environment:
+      TZ: UTC
+      REMIND_ENV_FILE: /run/secrets/remind_environment
+    volumes:
+      - /srv/discord-bots/remind/data:/app/data
+      - /srv/discord-bots/remind/logs:/app/logs
+      - /srv/discord-bots/remind/environment:/run/secrets/remind_environment:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
