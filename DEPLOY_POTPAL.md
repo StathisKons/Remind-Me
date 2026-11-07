@@ -52,3 +52,17 @@ sudo docker compose -f compose.potpal.yaml up -d --build
 - The image build/runtime does not require the private token file to be in Git.
 - `t;meta restart` exits with code 42; Docker restarts the container because of its restart policy, but does not download or build updated code.
 - Do not run the original `run.sh` on the server; it automatically pulls and installs dependencies during each restart.
+
+## Separate Codeforces reminder roles
+
+On the Discord server, create two mentionable roles (for example `ContestAlerts` for Div. 2+ and `ContestDiv1` for Div. 1). Give your own Discord account the `RemindMod` role (no Discord administrator permission needed). In the reminder channel:
+
+```text
+t;remind configure @ContestAlerts 60 10
+t;remind configure_div1 @ContestDiv1 60 10
+t;remind subscribe codeforces.com
+t;remind subscribe_div1 codeforces.com
+t;remind split_codeforces on
+```
+
+When split mode is enabled, Div. 1-only Codeforces contests are excluded from the general notifications, while combined Div. 1+2 / rated-for-all contests still notify both roles. Non-Codeforces contests keep their original filters. Each role must be mentionable for `configure` to accept it.
